@@ -113,29 +113,7 @@ class Purchase(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
 
-
-class Message(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
-    text = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-
-
-class SupportTicket(models.Model):
-    STATUS_CHOICES = (
-    ('Open', 'Open'),
-    ('Closed', 'Closed'),
-    ('In Progress', 'In Progress'),
-    # Add other status choices as needed
-)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    subject = models.CharField(max_length=255)
-    description = models.TextField()
-    image = models.ImageField(upload_to='support_tickets/', blank=True, null=True)
-    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='Open')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+## after this line I am not sure
     
 # class Withdrawal(models.Model):
 #     user = models.ForeignKey('User', on_delete=models.CASCADE)
@@ -143,12 +121,12 @@ class SupportTicket(models.Model):
 #     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
 #     created_at = models.DateTimeField(auto_now_add=True)
 
-class Contract(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
+# class Contract(models.Model):
+#     user = models.ForeignKey('User', on_delete=models.CASCADE)
+#     title = models.CharField(max_length=255)
+#     description = models.TextField()
+#     price = models.DecimalField(max_digits=10, decimal_places=2)
+#     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
 
-    def __str__(self):
-        return self.title
+#     def __str__(self):
+#         return self.title
