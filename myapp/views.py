@@ -303,27 +303,8 @@ def payment_gateway(request):
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+## after this line I am not sure
 
-
-
-
-
-
-@login_required
-def category_products(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-    products = category.product_set.all()  # Access related products through the 'product_set' attribute
-
-    data = {
-        'category_id': category.id,
-        'category_name': category.name,
-        'products': [{'id': product.id, 'title': product.title, 'description': product.description, 'price': product.price, 'image_url': product.image.url} for product in products],
-    }
-
-    return JsonResponse(data)
-
-
-from django.shortcuts import get_object_or_404
 
 @login_required
 #http://127.0.0.1:8000/myapp/messages/?other_user=Mohamed@gmail.com
@@ -393,48 +374,6 @@ def chat(request):
     }
 
     return JsonResponse(data)
-
-from django.contrib.auth.decorators import login_required
-
-@login_required
-def create_support_ticket(request):
-    if request.method == 'POST':
-        form = SupportTicketForm(request.POST, request.FILES)
-        if form.is_valid():
-            support_ticket = form.save(commit=False)
-            support_ticket.user = request.user
-            support_ticket.save()
-            return JsonResponse({'success': True})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors})
-    else:
-        form = SupportTicketForm()
-        return JsonResponse({'success': False, 'html': form.as_p()})
-
-
-@login_required
-def support_history(request):
-    user = User.objects.get(email=request.user.email)
-    support_tickets = SupportTicket.objects.filter(user=user) 
-    data = {
-        'support_tickets': []
-    }
-
-    if support_tickets.exists():
-        data['support_tickets'] = [
-            {
-                'id': ticket.id,
-                'subject': ticket.subject,
-                'description': ticket.description,
-                'status': ticket.status,
-            }
-            for ticket in support_tickets
-        ]
-
-    return JsonResponse(data)
-
-
-
 
 
 @login_required
