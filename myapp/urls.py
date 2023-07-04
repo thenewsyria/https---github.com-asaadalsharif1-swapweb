@@ -17,9 +17,9 @@ urlpatterns = [
     path('submit_support/', views.submit_support, name='submit_support'),
     path('historysupport/', views.historysupport, name='historysupport'),
     path('live_support/<int:support_id>/', views.live_support, name='live_support'),
-    path('messages/', views.messages, name='messages'),
     path('payment_gateway/', payment_gateway, name='payment_gateway'),
-    path('chat/', views.chat, name='chat'), # http://127.0.0.1:8000/myapp/chat/?other_user=Mohamed@gmail.com
+    path('chat/<product_id>/', views.chat, name='chat'), 
+    path('get_messages/<product_id>/', views.get_messages, name='get_messages'), 
     path('contracts/', views.contracts, name='contracts'),
      path('admin/password_reset/', auth_views.PasswordResetView.as_view(), name='admin_password_reset'),
     path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='admin_password_reset_done'),
