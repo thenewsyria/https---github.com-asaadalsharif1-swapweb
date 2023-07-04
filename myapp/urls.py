@@ -20,7 +20,6 @@ urlpatterns = [
     path('messages/', views.messages, name='messages'),
     path('payment_gateway/', payment_gateway, name='payment_gateway'),
     path('chat/', views.chat, name='chat'), # http://127.0.0.1:8000/myapp/chat/?other_user=Mohamed@gmail.com
-    path('support/', views.create_support_ticket, name='create_support_ticket'),
     path('contracts/', views.contracts, name='contracts'),
      path('admin/password_reset/', auth_views.PasswordResetView.as_view(), name='admin_password_reset'),
     path('admin/password_reset/done/', auth_views.PasswordResetDoneView.as_view(), name='admin_password_reset_done'),
