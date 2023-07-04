@@ -74,14 +74,19 @@ from django.db import models
 from django.utils import timezone
 from .models import Support, User
 
+from django.db import models
+
 class Message(models.Model):
-    support = models.ForeignKey(Support, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE,default=None)
     content = models.TextField()
-    timestamp = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Message from {self.sender.email} to {self.support.subject}"
+        return f"From: {self.sender.email} - To: {self.receiver.email} - Product: {self.product.title}"
+
+
 
 from django.db import models
 from django.contrib.auth import get_user_model
