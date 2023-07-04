@@ -121,12 +121,12 @@ class Purchase(models.Model):
 #     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
 #     created_at = models.DateTimeField(auto_now_add=True)
 
-# class Contract(models.Model):
-#     user = models.ForeignKey('User', on_delete=models.CASCADE)
-#     title = models.CharField(max_length=255)
-#     description = models.TextField()
-#     price = models.DecimalField(max_digits=10, decimal_places=2)
-#     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
+class Contract(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('completed', 'Completed')])
 
-#     def __str__(self):
-#         return self.title
+    def __str__(self):
+        return self.title
