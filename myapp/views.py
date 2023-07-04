@@ -305,75 +305,44 @@ def payment_gateway(request):
 ## after this line I am not sure
 
 
+@csrf_exempt
+def chat(request, product_id):
+    product = Products.objects.get(id=product_id)
+
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        sender = request.user
+        receiver = product.user
+
+        # Create a new message
+        message = Message.objects.create(sender=sender, receiver=receiver, product=product, content=content)
+
+        # Return success JSON response
+        return JsonResponse({'success': True, 'message': 'Message sent successfully.'})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 @login_required
-#http://127.0.0.1:8000/myapp/messages/?other_user=Mohamed@gmail.com
-def messages(request): 
-    # Get the current user's email
-    user_email = request.user.email
-    print(user_email)
-    
-    other_user_email = request.GET.get('other_user')
-    print(other_user_email)
+def get_messages(request, product_id):
+    product = Products.objects.get(id=product_id)
+    sender = request.user
+    receiver = product.user
 
-    # Get the user objects based on the email addresses
-    user = User.objects.get(email=user_email)
-    other_user = User.objects.get(email=other_user_email)
+    # Retrieve all messages between the sender and receiver for the given product
+    messages = Message.objects.filter(sender__in=[sender, receiver], receiver__in=[sender, receiver], product=product).order_by('created_at')
 
-    # Fetch the messages between the current user and the other user
-    messages = Message.objects.filter(
-        Q(sender=user, recipient=other_user) | Q(sender=other_user, recipient=user)
-    ).order_by('timestamp')
-
-    # Prepare the data to be sent as a JSON response
     data = {
         'messages': [
             {
-                'id': message.id,
-                'sender_id': message.sender.id,
-                'sender_username': message.sender.username,
-                'recipient_id': message.recipient.id,
-                'recipient_username': message.recipient.username,
-                'text': message.text,
-                'timestamp': message.timestamp.isoformat()
-            } for message in messages
-        ],
+                'sender': message.sender.email,
+                'receiver': message.receiver.email,
+                'content': message.content,
+                'created_at': message.created_at
+            }
+            for message in messages
+        ]
     }
-
     return JsonResponse(data)
-
-@login_required
-def chat(request):
-    user_email = request.user.email
-    other_user_email = request.GET.get('other_user')
-
-    try:
-        user = User.objects.get(email=user_email)
-        other_user = User.objects.get(email=other_user_email)
-    except User.DoesNotExist:
-        return HttpResponse("User not found")
-
-    messages = Message.objects.filter(
-        Q(sender=user, recipient=other_user) | Q(sender=other_user, recipient=user)
-    ).order_by('timestamp')
-
-    data = {
-        'other_user_id': other_user.id,
-        'other_user_username': other_user.username if hasattr(other_user, 'username') else other_user_email,
-        'messages': [
-            {
-                'id': message.id,
-                'sender_id': message.sender.id,
-                'sender_username': message.sender.username if hasattr(message.sender, 'username') else str(message.sender),
-                'recipient_id': message.recipient.id,
-                'recipient_username': message.recipient.username if hasattr(message.recipient, 'username') else str(message.recipient),
-                'text': message.text,
-                'timestamp': message.timestamp.isoformat()
-            } for message in messages
-        ],
-    }
-
-    return JsonResponse(data)
-
 
 @login_required
 def contracts(request):
