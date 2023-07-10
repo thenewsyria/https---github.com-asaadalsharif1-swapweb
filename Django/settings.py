@@ -156,7 +156,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'myapp',
+    'social_django',
+    
 ]
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'social_core.backends.apple.AppleIdAuth',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -228,4 +237,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 AUTH_USER_MODEL = 'myapp.User'
 
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'your_google_oauth2_key'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your_google_oauth2_secret'
+
+SOCIAL_AUTH_FACEBOOK_KEY = 'your_facebook_key'
+SOCIAL_AUTH_FACEBOOK_SECRET = 'your_facebook_secret'
+
+SOCIAL_AUTH_APPLE_ID_TEAM = 'your_apple_id_team'
+SOCIAL_AUTH_APPLE_ID_KEY = 'your_apple_id_key'
+SOCIAL_AUTH_APPLE_ID_PRIVATE_KEY = 'your_apple_id_private_key'
 
