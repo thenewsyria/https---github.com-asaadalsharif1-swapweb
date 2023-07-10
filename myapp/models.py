@@ -8,6 +8,7 @@ class CustomUserManager(BaseUserManager):
         user = self.model(email=self.normalize_email(email), full_name=full_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+        Profile.objects.create(user=user)
         return user
 
     def create_superuser(self, email, full_name=None, password=None, **extra_fields):
@@ -34,6 +35,21 @@ class User(AbstractUser):
     def __str__(self):
         return self.email
 
+from django.conf import settings
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    payment_email = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return self.user.email
+
+class TermsAndConditions(models.Model):
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+
+    def __str__(self):
+        return self.title
 
 class OTP(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
