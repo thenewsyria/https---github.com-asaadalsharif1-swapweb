@@ -23,7 +23,9 @@ class User(AbstractUser):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     phone_number = models.CharField(max_length=20, default='Not Provided')
-
+    google_id = models.CharField(max_length=255, blank=True, null=True)
+    facebook_id = models.CharField(max_length=255, blank=True, null=True)
+    apple_id = models.CharField(max_length=255, blank=True, null=True)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
@@ -58,6 +60,13 @@ class Products(models.Model):
     def __str__(self):
         return self.title
 
+class Favorit(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.product.title}"
+        
 from django.db import models
 
 class Support(models.Model):
