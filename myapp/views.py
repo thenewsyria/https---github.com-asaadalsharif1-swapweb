@@ -126,6 +126,16 @@ def social_sign_up(request, backend):
     else:
         return JsonResponse({'status': 'error', 'message': 'Failed to authenticate or sign up.'})
 
+from django.http import JsonResponse
+from .models import TermsAndConditions
+
+def terms_and_conditions(request):
+    terms = TermsAndConditions.objects.first()
+    data = {
+        'title': terms.title,
+        'text': terms.text,
+    }
+    return JsonResponse(data)
 
 def get_categories(request):
     categories = Categorys.objects.all()
@@ -141,6 +151,31 @@ def get_categories(request):
     }
     return JsonResponse(data)
 
+def get_all_products(request):
+    products = Products.objects.all()
+    data = {
+        'products': [
+            {
+                'id': product.id,
+                'title': product.title,
+                'price': str(product.price),
+                'description': product.description,
+                'image': product.image.url,
+                'video': product.video.url,
+                'category': {
+                    'id': product.category.id,
+                    'name': product.category.name
+                },
+                'user': {
+                    'id': product.user.id,
+                    'email': product.user.email
+                }
+            }
+            for product in products
+        ]
+    }
+    return JsonResponse(data)
+@csrf_exempt
 def get_products(request):
     user_email = request.user.email
     user=User.objects.get(email=user_email)
@@ -165,6 +200,42 @@ def get_products(request):
     }
     return JsonResponse(data)
 @csrf_exempt
+def upload_product(request):
+    if request.method == 'POST':
+        user_email = request.user.email
+        user = User.objects.get(email=user_email)
+
+        # Retrieve the product details from the request data
+        title = request.POST.get('title')
+        price = request.POST.get('price')
+        description = request.POST.get('description')
+        image = request.FILES.get('image')
+        video = request.FILES.get('video')
+        category_id = request.POST.get('category')
+
+        # Create the product object and save it to the database
+        product = Products(
+            title=title,
+            price=price,
+            description=description,
+            image=image,
+            video=video,
+            category_id=category_id,
+            user=user
+        )
+        product.save()
+
+        data = {
+            'message': 'Product uploaded successfully.'
+        }
+        return JsonResponse(data)
+    else:
+        data = {
+            'error': 'Invalid request method. Only POST requests are allowed.'
+        }
+        return JsonResponse(data, status=400)
+
+@csrf_exempt
 def addProductToFavorit(request, product_id):
     user_email = request.user.email
     user = User.objects.get(email=user_email)
@@ -179,6 +250,61 @@ def addProductToFavorit(request, product_id):
     return JsonResponse(data)
 
 from django.db.models import Q
+
+from .models import Profile
+
+def get_profile(request):
+    user = request.user
+
+    # Retrieve the profile for the current user
+    try:
+        profile = Profile.objects.get(user=user)
+        data = {
+            'email': user.email,
+            'password': '********',  # You may choose to obfuscate the password
+            'phone_number': user.phone_number,
+            'payment_email': profile.payment_email,
+        }
+        return JsonResponse(data)
+    except Profile.DoesNotExist:
+        data = {
+            'error': 'Profile does not exist for the current user.',
+        }
+        return JsonResponse(data, status=400)
+@csrf_exempt
+def edit_profile(request):
+    if request.method == 'POST':
+        user = request.user
+
+        # Retrieve the profile for the current user
+        try:
+            profile = Profile.objects.get(user=user)
+
+            # Update the email, password, phone number, and payment account
+            user.email = request.POST.get('email')
+            password = request.POST.get('password')
+            user.set_password(password)  # Set new password
+            user.save()
+
+            profile.phone_number = request.POST.get('phone_number')
+            profile.payment_account = request.POST.get('payment_account')
+            profile.save()
+
+            data = {
+                'message': 'Profile updated successfully.',
+            }
+            return JsonResponse(data)
+        except Profile.DoesNotExist:
+            data = {
+                'error': 'Profile does not exist for the current user.',
+            }
+            return JsonResponse(data, status=400)
+    else:
+        data = {
+            'error': 'Invalid request method. Only POST requests are allowed.',
+        }
+        return JsonResponse(data, status=400)
+
 
 def search_products(request):
     query = request.GET.get('query')  # Get the search query from the request parameters
