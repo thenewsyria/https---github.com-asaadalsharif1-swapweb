@@ -27,6 +27,8 @@ from django.views.csrf import csrf_failure
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('myapp/', include('myapp.urls')),
+    path('social-auth/', include('social_django.urls', namespace='social')),
+
     path('csrf_failure/', csrf_failure, name='csrf_failure'),
 
 ]
