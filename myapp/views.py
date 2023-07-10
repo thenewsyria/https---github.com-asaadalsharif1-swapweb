@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from myapp.models import User, Products, Purchase, Payment, Message, Categorys, Contract
+from myapp.models import User, Products,Favorit, Purchase, Payment, Message, Categorys, Contract
 
 from django.core.mail import send_mail
 from .models import OTP
@@ -70,66 +70,61 @@ def signin(request):
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 import random
-
-def generate_otp_code():
-    digits = "0123456789"
-    otp_code = ""
-    
-    for _ in range(6):
-        otp_code += random.choice(digits)
-    
-    return otp_code
 from django.core.mail import send_mail
-
-def send_otp_email(email, otp_code):
-    subject = 'OTP Code'
-    message = f'Your OTP code is: {otp_code}'
-    sender_email = 'momo@gmail.com'
-    recipient_email = email
-
-    send_mail(subject, message, sender_email, [recipient_email])
+from django.conf import settings
 
 @csrf_exempt
 def send_otp(request):
     if request.method == 'POST':
+        # Get the currently logged-in user
         user = request.user
 
-        # Generate OTP code (you can customize the code generation logic)
-        otp_code = generate_otp_code()
+        # Generate a random OTP code
+        otp_code = str(random.randint(100000, 999999))
 
         # Save the OTP code to the database
-        OTP.objects.create(user=user, otp_code=otp_code)
+        otp = OTP(user=user, otp_code=otp_code)
+        otp.save()
 
-        # Send the OTP code to the user's email
-        send_otp_email(user.email, otp_code)
+        # Send the OTP code to the user via email
+        subject = 'OTP Code'
+        message = f'Your OTP code is: {otp_code}'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        to_email = user.email
 
-        # Return success JSON response
-        return JsonResponse({'success': True, 'message': 'OTP code sent to your email.'})
-
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
-
-
-@login_required
-def verify_otp(request):
-    if request.method == 'POST':
-        user = request.user
-        otp_code = request.POST.get('otp_code')
-
-        # Check if the OTP code is valid for the user
-        otp = OTP.objects.filter(user=user, otp_code=otp_code).first()
-        if otp is not None:
-            # OTP code is valid, you can perform the account verification here
-
-            # Delete the OTP code from the database
-            otp.delete()
-
-            # Return success JSON response
-            return JsonResponse({'success': True, 'message': 'Account verified successfully.'})
-        else:
-            # Invalid OTP code
-            return JsonResponse({'error': 'Invalid OTP code.'}, status=400)
+        try:
+            send_mail(subject, message, from_email, [to_email])
+            return JsonResponse({'success': True, 'message': 'OTP sent successfully'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+from django.contrib.auth import login
+from django.http import JsonResponse
+from social_django.utils import psa
+@csrf_exempt
+@psa('social:complete')
+def social_login(request, backend):
+    user = request.backend.do_auth(request.GET.get('access_token'))
+    if user:
+        login(request, user)
+        return JsonResponse({'status': 'success', 'message': 'Logged in successfully.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Failed to authenticate.'})
+@psa('social:complete')
+
+@csrf_exempt
+def social_sign_up(request, backend):
+    user = request.backend.do_auth(request.GET.get('access_token'))
+    if user:
+        user.is_active = True  # Activate the user
+        user.save()
+        login(request, user)
+        return JsonResponse({'status': 'success', 'message': 'Signed up and logged in successfully.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Failed to authenticate or sign up.'})
 
 
 def get_categories(request):
@@ -169,7 +164,19 @@ def get_products(request):
         ]
     }
     return JsonResponse(data)
+@csrf_exempt
+def addProductToFavorit(request, product_id):
+    user_email = request.user.email
+    user = User.objects.get(email=user_email)
+    product = Products.objects.get(id=product_id)
 
+    favorit = Favorit(user=user, product=product)
+    favorit.save()
+
+    data = {
+        'message': 'Product added to favorites successfully.',
+    }
+    return JsonResponse(data)
 
 from django.db.models import Q
 
