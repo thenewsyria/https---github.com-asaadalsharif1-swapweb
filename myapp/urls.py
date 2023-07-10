@@ -8,10 +8,15 @@ from myapp.views import payment_gateway
 urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('signin/', views.signin, name='signin'),
+    #http://localhost:8000/myapp/social-login/google/
+    path('social-login/<backend>/', views.social_login, name='social-login'),
+    path('social-sign-up/<backend>/', views.social_sign_up, name='social-sign-up'),
+#http://127.0.0.1:8000/api/social-login/google/
     path('send_otp/', views.send_otp, name='send_otp'),
-    path('verify_otp/', views.verify_otp, name='verify_otp'),
+   
     path('categories/', views.get_categories, name='get_categories'),
     path('products/', views.get_products, name='get_products'),
+    path('add-favorite/<int:product_id>/', views.addProductToFavorit, name='add_product_to_favorit'),
     path('search_products/', views.search_products, name='search_products'),
         #http://localhost:8000/myapp/search_products/?query=music
     path('submit_support/', views.submit_support, name='submit_support'),
